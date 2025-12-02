@@ -1,0 +1,177 @@
+<div class="login-page">
+  <!-- Fondo animado -->
+  <div class="background-overlay"></div>
+  
+  <div class="login-container" [class.expanded]="showRegisterForm">
+    <!-- Logo y Header -->
+    <div class="login-header">
+      <div class="logo-icon">💰</div>
+      <h1>My Wallet</h1>
+      <p class="tagline">Tu cartera de inversiones inteligente</p>
+    </div>
+
+    <!-- Indicador de modo -->
+    <div class="mode-indicator">
+      <span [class.active]="!showRegisterForm">Iniciar Sesión</span>
+      <span class="separator">|</span>
+      <span [class.active]="showRegisterForm">Registrarse</span>
+    </div>
+
+    <!-- FORMULARIO DE LOGIN -->
+    <form *ngIf="!showRegisterForm" [formGroup]="loginForm" (ngSubmit)="login()" class="auth-form">
+      
+      <div class="input-group">
+        <label for="username">
+          <i class="icon">👤</i>
+          Usuario
+        </label>
+        <input 
+          type="text" 
+          id="username" 
+          formControlName="username"
+          placeholder="Ingresa tu usuario"
+          autocomplete="username">
+        <div class="input-error" *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched">
+          Usuario requerido
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="password">
+          <i class="icon">🔒</i>
+          Contraseña
+        </label>
+        <div class="password-wrapper">
+          <input 
+            [type]="showPassword ? 'text' : 'password'" 
+            id="password" 
+            formControlName="password"
+            placeholder="Ingresa tu contraseña"
+            autocomplete="current-password">
+          <button 
+            type="button" 
+            class="toggle-password"
+            (click)="showPassword = !showPassword">
+            {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+          </button>
+        </div>
+        <div class="input-error" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+          Contraseña requerida
+        </div>
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">
+        ⚠️ {{ errorMessage }}
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="loginForm.invalid">
+        <span>Iniciar Sesión</span>
+        <i class="arrow">→</i>
+      </button>
+
+      <div class="divider">
+        <span>¿No tienes cuenta?</span>
+      </div>
+
+      <button type="button" class="btn-secondary" (click)="cambiarRegistro()">
+        Crear cuenta nueva
+      </button>
+    </form>
+
+    <!-- FORMULARIO DE REGISTRO -->
+    <form *ngIf="showRegisterForm" [formGroup]="registerForm" (ngSubmit)="enRegistro()" class="auth-form register-form">
+      
+      <div class="input-group">
+        <label for="reg-username">
+          <i class="icon">👤</i>
+          Usuario
+        </label>
+        <input 
+          type="text" 
+          id="reg-username" 
+          formControlName="username"
+          placeholder="Elige un nombre de usuario">
+      </div>
+
+      <div class="input-group">
+        <label for="reg-email">
+          <i class="icon">📧</i>
+          Email
+        </label>
+        <input 
+          type="email" 
+          id="reg-email" 
+          formControlName="email"
+          placeholder="tu@email.com">
+      </div>
+
+      <div class="input-row">
+        <div class="input-group half">
+          <label for="first-name">
+            <i class="icon">✏️</i>
+            Nombre
+          </label>
+          <input 
+            type="text" 
+            id="first-name" 
+            formControlName="first_name"
+            placeholder="Nombre">
+        </div>
+
+        <div class="input-group half">
+          <label for="last-name">
+            <i class="icon">✏️</i>
+            Apellido
+          </label>
+          <input 
+            type="text" 
+            id="last-name" 
+            formControlName="last_name"
+            placeholder="Apellido">
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="reg-password">
+          <i class="icon">🔒</i>
+          Contraseña
+        </label>
+        <div class="password-wrapper">
+          <input 
+            [type]="showPasswordReg ? 'text' : 'password'" 
+            id="reg-password" 
+            formControlName="password"
+            placeholder="Elige una contraseña segura">
+          <button 
+            type="button" 
+            class="toggle-password"
+            (click)="showPasswordReg = !showPasswordReg">
+            {{ showPasswordReg ? '👁️' : '👁️‍🗨️' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="success-message" *ngIf="registerMessage">
+        ✅ {{ registerMessage }}
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="registerForm.invalid">
+        <span>Crear Cuenta</span>
+        <i class="arrow">→</i>
+      </button>
+
+      <div class="divider">
+        <span>¿Ya tienes cuenta?</span>
+      </div>
+
+      <button type="button" class="btn-secondary" (click)="cambiarRegistro()">
+        Volver a iniciar sesión
+      </button>
+    </form>
+
+    <!-- Footer -->
+    <div class="login-footer">
+      <p>© 2025 My Wallet - Gestión de inversiones</p>
+    </div>
+  </div>
+</div>

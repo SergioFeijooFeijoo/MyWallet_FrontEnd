@@ -1,0 +1,471 @@
+<!--
+<p>cartera works!</p>
+-->
+
+<!--    CABECERA Y MENU PRINCIPAL: -->
+<div class="app-header">
+  <div class="header-content">
+    <div class="logo-section">
+      <span class="logo-icon">💰</span>
+      <h1>My Wallet</h1>
+    </div>
+    
+    <nav class="main-nav">
+      <button 
+        class="nav-btn" 
+        [class.active]="!mostrarCuenta && !mostrarGraficos"
+        (click)="cerrarCuenta(); cerrarGraficos()">
+        <span class="nav-icon">📊</span>
+        <span class="nav-text">Cartera</span>
+      </button>
+      
+      <button 
+        class="nav-btn" 
+        [class.active]="!mostrarCuenta && mostrarGraficos"
+        (click)="verGraficos(); cerrarCuenta()">
+        <span class="nav-icon">📈</span>
+        <span class="nav-text">Gráficos</span>
+      </button>
+      
+      <button 
+        class="nav-btn" 
+        [class.active]="mostrarCuenta && !mostrarGraficos"
+        (click)="verCuenta(); cerrarGraficos()">
+        <span class="nav-icon">👤</span>
+        <span class="nav-text">Cuenta</span>
+      </button>
+      
+      <button class="nav-btn logout-btn" (click)="logout()">
+        <span class="nav-icon">🚪</span>
+        <span class="nav-text">Salir</span>
+      </button>
+    </nav>
+  </div>
+</div>
+
+  <p *ngIf="activos.length === 0" class="mensaje-no-datos">Aún no hay activos.</p>
+
+  <table *ngIf="!mostrarCuenta && !mostrarGraficos && activos.length > 0" class="cartera-table">
+    <thead>
+      <tr>
+        <th>Símbolo</th>
+        <th>Participaciones</th>
+        <th>Precio medio</th>
+        <th>Precio actual</th>
+        <th>Pérdidas / Ganancias <br>(%)</th>
+        <th>Invertido</th>
+        <th>Retorno</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let activo of activosFiltrados">
+        <td 
+          class="simbolo-clickeable" 
+          (click)="verHistoricoActivo(activo.simbolo)"
+          title="Click para ver histórico">
+          {{ activo.simbolo }}
+        </td>
+        <td>{{ activo.participaciones | number:'1.2-2' }}</td>
+        <td>{{ activo.precio_medio | number:'1.2-2' }} €</td>
+        <td>{{ activo.precio_actual | number:'1.2-2' }} €</td>
+        <td [ngStyle]="{'color': calcularPorcentaje(activo) <= 0 ? 'red' : 'green'}">
+          {{ calcularPorcentaje(activo) | number:'1.2-2'}}%
+        </td>
+        <td>{{ activo.total_invertido | number:'1.2-2' }} €</td>
+        <td [ngStyle]="{'color': calcularPorcentaje(activo) <= 0 ? 'red' : 'green'}">
+          {{ calcularValorActual(activo) | number:'1.2-2' }} €
+        </td>
+
+
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!mostrarCuenta && !mostrarGraficos" class="add-button" (click)="irAgregarTransaccion()">+ Añadir Activo</div>
+
+
+<div *ngIf="mostrarCuenta" class="perfil-y-grafico">
+  <div class="perfil-container">
+    <h2 style="text-decoration:underline;">Perfil de Usuario:</h2>
+    <p><strong>Nombre:</strong> {{ perfilUsuario.first_name }} {{ perfilUsuario.last_name }}</p>
+    <p><strong>Email:</strong> {{ perfilUsuario.email }}</p>
+    <p><strong>Total En Cartera:</strong> {{ perfilUsuario.total_invertido | currency:'EUR' }}</p>
+          <button class="tab" (click)="logout()">Cerrar Sesión</button>
+
+  </div>
+</div>
+
+<div *ngIf="mostrarGraficos" class="dashboard-container">
+  
+  <!-- HEADER DEL DASHBOARD -->
+  <div class="dashboard-header">
+    <h2>📊 Panel de Análisis</h2>
+    <p class="dashboard-subtitle">Visualización completa de tu cartera de inversiones</p>
+  </div>
+
+  <!-- GRID PRINCIPAL -->
+  <div class="grid-dashboard">
+    
+    <!-- FILA 1: DOS PIES Y EVOLUCIÓN -->
+    <div class="grid-item pie-1">
+      <div class="tarjeta">
+        <div class="chart-header">
+          <h3>💼 Distribución por Activos</h3>
+        </div>
+        <div class="chart-container-small">
+         <canvas baseChart 
+            [data]="dataGraficoPie" 
+            [type]="tipoGraficoPie" 
+            [options]="OpcionesGraficoPie">
+          </canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-item pie-2">
+      <div class="tarjeta">
+        <div class="chart-header">
+          <h3>🏦 Distribución por Tipo</h3>
+        </div>
+        <div class="chart-container-small">
+          <canvas baseChart 
+            [data]="dataGraficoPieTipos" 
+            [type]="tipoGraficoPieTipos" 
+            [options]="OpcionesGraficoPieTipos">
+          </canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-item evolucion">
+      <div class="tarjeta">
+        <div class="chart-header">
+          <h3>📈 Evolución de tu Cartera</h3>
+        </div>
+        <div class="chart-container-medium">
+          <canvas baseChart 
+            [data]="dataGraficoLineas" 
+            [options]="OpcionesGraficoLineas" 
+            [type]="tipoGraficoLineas">
+          </canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILA 2: DOS GRÁFICOS DE BARRAS -->
+    <div class="grid-item barras-euros">
+      <div class="tarjeta">
+        <div class="chart-header">
+          <h3>💰 Ganancia/Pérdida (€)</h3>
+        </div>
+        <div class="chart-container-medium">
+          <canvas baseChart 
+            [data]="dataGraficoBarras" 
+            [options]="OpcionesGraficoBarras" 
+            [type]="tipoGraficoBarras">
+          </canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-item barras-porcentaje">
+      <div class="tarjeta">
+        <div class="chart-header">
+          <h3>📊 Rendimiento Porcentual</h3>
+        </div>
+        <div class="chart-container-medium">
+          <canvas baseChart 
+            [data]="dataGraficoBarrasPorcentaje" 
+            [options]="OpcionesGraficoBarrasPorcentaje" 
+            [type]="tipoGraficoBarrasPorcentaje">
+          </canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+
+
+
+  <div style="text-align: center; margin-top: 20px;">
+  </div>
+
+
+
+
+<!-- FORMULARIO MEJORADO PARA AGREGAR TRANSACCIÓN -->
+<div *ngIf="mostrarFormulario" class="form-overlay" (click)="cerrarFormulario()">
+  <div class="form-container" (click)="$event.stopPropagation()">
+    
+    <!-- Header del formulario -->
+    <div class="form-header">
+      <div class="form-icon">💰</div>
+      <h2>Nueva Transacción</h2>
+      <p class="form-subtitle">Registra una compra o venta de activo</p>
+      <button type="button" class="close-btn" (click)="cerrarFormulario()">✕</button>
+    </div>
+
+    <form (ngSubmit)="agregarActivo()" #activoForm="ngForm">
+      
+      <!-- SECCIÓN: INFORMACIÓN DEL ACTIVO -->
+      <div class="form-section">
+        <div class="section-title">
+          <span class="section-icon">📋</span>
+          <span>Información del Activo</span>
+        </div>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label for="simbolo">
+              <span class="label-icon">🔤</span>
+              Símbolo
+            </label>
+            <input 
+              type="text" 
+              id="simbolo" 
+              [(ngModel)]="nuevoActivo.simbolo" 
+              name="simbolo"
+              (ngModelChange)="completarNombreConSimbolo()"
+              placeholder="Ej: AAPL, MSFT" 
+              required
+              autocomplete="off">
+          </div>
+
+          <div class="input-group">
+            <label for="nombre">
+              <span class="label-icon">📝</span>
+              Nombre
+            </label>
+            <input 
+              type="text" 
+              id="nombre" 
+              [(ngModel)]="nuevoActivo.nombre" 
+              name="nombre"
+              (ngModelChange)="completarSimboloConNombre()"
+              placeholder="Ej: Apple Inc." 
+              required
+              autocomplete="off">
+          </div>
+        </div>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label for="tipoactivo">
+              <span class="label-icon">🏦</span>
+              Tipo de Activo
+            </label>
+            <select 
+              id="tipoactivo" 
+              [(ngModel)]="nuevoActivo.tipo_activo" 
+              name="tipoactivo" 
+              required>
+              <option value="" disabled selected>Selecciona tipo</option>
+              <option value="stock">📈 Stock</option>
+              <option value="crypto">₿ Crypto</option>
+              <option value="forex">💱 Forex</option>
+              <option value="etfs">📊 ETFs</option>
+              <option value="fondos">🏛️ Fondos</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label for="tipotransaccion">
+              <span class="label-icon">🔄</span>
+              Tipo de Operación
+            </label>
+            <select 
+              id="tipotransaccion" 
+              [(ngModel)]="nuevoActivo.tipo_transaccion" 
+              name="tipotransaccion" 
+              required>
+              <option value="" disabled selected>Selecciona operación</option>
+              <option value="compra">🟢 Compra</option>
+              <option value="venta">🔴 Venta</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN: DETALLES DE LA TRANSACCIÓN -->
+      <div class="form-section">
+        <div class="section-title">
+          <span class="section-icon">💵</span>
+          <span>Detalles de la Transacción</span>
+        </div>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label for="cantidad">
+              <span class="label-icon">🔢</span>
+              Participaciones
+            </label>
+            <input 
+              type="number" 
+              step="0.01" 
+              min="0.01" 
+              id="cantidad" 
+              [(ngModel)]="nuevoActivo.cantidad" 
+              name="cantidad"
+              (ngModelChange)="calcularInversionTotal()"
+              placeholder="Ej: 10.50" 
+              required>
+          </div>
+
+          <div class="input-group">
+            <label for="precio">
+              <span class="label-icon">💰</span>
+              Precio por Unidad
+            </label>
+            <div class="price-input-wrapper">
+              <input 
+                type="number" 
+                step="0.01" 
+                min="0.01" 
+                id="precio"
+                [(ngModel)]="nuevoActivo.precio_compra"
+                name="preciocompra"
+                (ngModelChange)="redondearPrecio()"
+                placeholder="Ej: 150.25"
+                required>
+              <button 
+                type="button" 
+                class="btn-fetch-price" 
+                (click)="obtenerPrecioAPI()"
+                title="Obtener precio actual">
+                🔄
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-group full-width">
+          <label for="fecha">
+            <span class="label-icon">📅</span>
+            Fecha de Transacción
+          </label>
+          <input 
+            type="date" 
+            id="fecha" 
+            [(ngModel)]="nuevoActivo.fecha_transaccion" 
+            name="fecha" 
+            required>
+        </div>
+
+        <!-- RESUMEN TOTAL -->
+        <div 
+          *ngIf="nuevoActivo.cantidad > 0 && nuevoActivo.precio_compra > 0" 
+          class="total-summary"
+          [class.venta]="nuevoActivo.tipo_transaccion === 'venta'">
+          <div class="summary-content">
+            <div class="summary-label">
+              <span class="summary-icon">{{ nuevoActivo.tipo_transaccion === 'venta' ? '💸' : '💰' }}</span>
+              <span>Total {{ nuevoActivo.tipo_transaccion === 'venta' ? 'a recuperar' : 'a invertir' }}</span>
+            </div>
+            <div class="summary-amount">
+              {{ calcularTotalInvertir() | number:'1.2-2' }} €
+            </div>
+          </div>
+          <div class="summary-detail">
+            {{ nuevoActivo.cantidad | number:'1.2-2' }} × {{ nuevoActivo.precio_compra | number:'1.2-2' }} €
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTONES DE ACCIÓN -->
+      <div class="form-actions">
+        <button 
+          type="submit" 
+          class="btn-submit"
+          [disabled]="!activoForm.valid">
+          <span class="btn-icon">✓</span>
+          <span>Guardar Transacción</span>
+        </button>
+        <button 
+          type="button" 
+          class="btn-cancel" 
+          (click)="cerrarFormulario()">
+          <span class="btn-icon">✕</span>
+          <span>Cancelar</span>
+        </button>
+      </div>
+    </form>
+  </div>
+ </div>
+
+<!-- MODAL DEL GRÁFICO HISTÓRICO CON TRANSACCIONES -->
+<div *ngIf="mostrarHistorico" class="modal-overlay" (click)="cerrarHistorico()">
+  <div class="modal-historico-amplio" (click)="$event.stopPropagation()">
+    <button class="btn-cerrar-modal" (click)="cerrarHistorico()">✕</button>
+    <h2 class="titulo-historico">{{ nombreGraficoHistorico }}</h2>
+    
+    <div class="contenedor-principal">
+      <!-- COLUMNA IZQUIERDA: GRÁFICO -->
+      <div class="columna-grafico">
+        <div class="contenedor-grafico-historico">
+          <canvas baseChart
+            [data]="dataGraficoHistorico"
+            [type]="tipoGraficoHistorico"
+            [options]="OpcionesGraficoHistorico">
+          </canvas>
+        </div>
+      </div>
+      
+      <!-- COLUMNA DERECHA: LISTA DE TRANSACCIONES -->
+      <div class="columna-transacciones">
+        <h3 class="titulo-transacciones">
+          <span class="icono-titulo">📋</span>
+          Historial de Operaciones
+        </h3>
+        
+        <div class="lista-transacciones">
+          <div *ngIf="transaccionesActivo.length === 0" class="sin-transacciones">
+            <span class="icono-vacio">📭</span>
+            <p>No hay transacciones registradas</p>
+          </div>
+          
+          <div 
+            *ngFor="let trans of transaccionesActivo" 
+            class="tarjeta-transaccion"
+            [class.compra]="trans.tipo_transaccion === 'compra'"
+            [class.venta]="trans.tipo_transaccion === 'venta'">
+            
+            <div class="header-transaccion">
+              <span class="fecha-transaccion">{{ trans.fecha_transaccion | date:'dd/MM/yyyy' }}</span>
+              <span class="tipo-transaccion" [class.tipo-compra]="trans.tipo_transaccion === 'compra'"
+                    [class.tipo-venta]="trans.tipo_transaccion === 'venta'">
+                {{ trans.tipo_transaccion === 'compra' ? '🟢 Compra' : '🔴 Venta' }}
+              </span>
+            </div>
+            
+            <div class="info-transaccion">
+              <div class="dato-transaccion">
+                <span class="label">Cantidad:</span>
+                <span class="valor">{{ trans.cantidad | number:'1.2-2' }}</span>
+              </div>
+              
+              <div class="dato-transaccion">
+                <span class="label">Precio:</span>
+                <span class="valor">{{ trans.precio_compra | number:'1.2-2' }} €</span>
+              </div>
+              
+              <div class="dato-transaccion total">
+                <span class="label">Total:</span>
+                <span class="valor-total" 
+                      [class.positivo]="trans.tipo_transaccion === 'compra'"
+                      [class.negativo]="trans.tipo_transaccion === 'venta'">
+                  {{ trans.tipo_transaccion === 'compra' ? '+' : '-' }}{{ (trans.cantidad * trans.precio_compra) | number:'1.2-2' }} €
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 
+

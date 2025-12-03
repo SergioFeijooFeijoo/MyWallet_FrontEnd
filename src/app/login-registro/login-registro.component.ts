@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
 import { HttpClient } from '@angular/common/http';
 import { setThrowInvalidWriteToSignalError } from '@angular/core/primitives/signals';
+import { environment } from '../../environments/environment';
 
 
 
@@ -18,6 +19,8 @@ export class LoginRegistroComponent {
   errorMessage: string = '';
   registerMessage: string = '';
   showRegisterForm: boolean = false;
+  private apiUrl = environment.apiUrl;
+  
 
   //TOGGLE PASSWORD
   showPassword: boolean = false;
@@ -47,7 +50,7 @@ export class LoginRegistroComponent {
     const { username, password } = this.loginForm.value;
     this.errorMessage = '';
 
-    this.http.post('http://localhost:8000/api/login/',{
+    this.http.post(`${this.apiUrl}/login/`,{
       username,password
     }).subscribe({
       next: (res: any) => {
@@ -81,7 +84,7 @@ export class LoginRegistroComponent {
       username, password,first_name,
       last_name,email
     } = this.registerForm.value;
-    this.http.post('http://localhost:8000/api/register/',{
+    this.http.post(`${this.apiUrl}/register/`,{
       username,password,first_name,last_name,email
     }).subscribe({
       next:() =>{

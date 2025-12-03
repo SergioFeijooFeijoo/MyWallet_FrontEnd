@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { ChartConfiguration, ChartType, ChartData, ChartOptions } from 'chart.js';
 import { InversionesService } from '../services/inversiones.service';
+import { environment } from '../../environments/environment';
 
 
 interface Activo{
@@ -26,7 +27,7 @@ interface Activo{
 export class HomeComponent implements OnInit{
   activos: Activo[] = [];
   precio: number = 0;
-  url: string = 'http://localhost:8000/api/';
+  private apiUrl = environment.apiUrl;
 
   constructor(
     private http: HttpClient,
@@ -37,7 +38,7 @@ export class HomeComponent implements OnInit{
   ngOnInit(): void {
     const userId = Number(localStorage.getItem('usuario'));
     
-    this.http.get<Activo[]>(`${this.url}activos/${userId}/`) 
+    this.http.get<Activo[]>(`${this.apiUrl}activos/${userId}/`) 
     .subscribe({
       next:(data:any) =>{
         this.activos = data;
@@ -65,7 +66,7 @@ export class HomeComponent implements OnInit{
       return;
     }
 
-    this.http.get<any>(`http://localhost:8000/api/precio/?simbolo=${simbolo}`).subscribe({
+    this.http.get<any>(`${this.apiUrl}/precio/?simbolo=${simbolo}`).subscribe({
       next:res =>{
         this.nuevoActivo.precio_compra = parseFloat(res.precio.toFixed(2));
         this.calcularInversionTotal();
@@ -182,7 +183,7 @@ export class HomeComponent implements OnInit{
       fecha_transaccion : this.nuevoActivo.fecha_transaccion,
     };
 
-    this.http.post(`${this.url}activos/add/`,payload).subscribe({
+    this.http.post(`${this.apiUrl}activos/add/`,payload).subscribe({
       next: (res) => {
         // NUEVO: Mensaje mejorado que muestra participaciones y total
         const totalInvertir = this.calcularTotalInvertir();
@@ -206,7 +207,7 @@ export class HomeComponent implements OnInit{
   verCuenta() {
     this.mostrarCuenta = true;
     const userId = parseInt(localStorage.getItem('usuario') || '0', 10);
-    this.http.get(`${this.url}perfil/${userId}`).subscribe({
+    this.http.get(`${this.apiUrl}perfil/${userId}`).subscribe({
       next: (res) => {
         this.perfilUsuario = res;
       },
@@ -225,7 +226,7 @@ export class HomeComponent implements OnInit{
   verGraficos() { 
     this.mostrarGraficos = true;
     const userId = parseInt(localStorage.getItem('usuario') || '0', 10);
-    this.http.get(`${this.url}perfil/${userId}`).subscribe({
+    this.http.get(`${this.apiUrl}perfil/${userId}`).subscribe({
       next:(res) => {
         this.perfilUsuario = res;
       },
@@ -246,7 +247,7 @@ export class HomeComponent implements OnInit{
 
     if(simbolo.trim().length < 2) return;
 
-    this.http.get<any>(`${this.url}buscar-activo/?activo=${encodeURIComponent(simbolo)}`)
+    this.http.get<any>(`${this.apiUrl}buscar-activo/?activo=${encodeURIComponent(simbolo)}`)
     .subscribe({
       next: res => {
         this.nuevoActivo.nombre = res.nombre;
@@ -262,7 +263,7 @@ export class HomeComponent implements OnInit{
 
     if(nombre.trim().length < 2) return;
 
-    this.http.get<any>(`http://localhost:8000/api/buscar-activo/${nombre}`)
+    this.http.get<any>(`${this.apiUrl}/buscar-activo/${nombre}`)
     .subscribe({
       next: res => {
         this.nuevoActivo.simbolo = res.simbolo;
@@ -530,7 +531,7 @@ OpcionesGraficoLineas: ChartConfiguration<'line'>['options'] = {
  actualizarGraficoLineas(): void {
   const userId = Number(localStorage.getItem('usuario'));
   
-  this.http.get(`${this.url}inversiones-timeseries/${userId}/`)
+  this.http.get(`${this.apiUrl}inversiones-timeseries/${userId}/`)
     .subscribe({
       next: (data: any) => {
         console.log('Datos recibidos del time series:', data);
@@ -895,7 +896,7 @@ verHistoricoActivo(simbolo: string): void {
   const tipoActivo = this.mapearTipoActivo(activo?.tipo_activo || 'Stock');
   
   // Llamar a la API del histórico de precios
-  this.http.get(`${this.url}historico-activo/?simbolo=${simbolo}&type=${tipoActivo}&interval=1week`)
+  this.http.get(`${this.apiUrl}historico-activo/?simbolo=${simbolo}&type=${tipoActivo}&interval=1week`)
     .subscribe({
       next: (res: any) => {
         if (!res.historico || res.historico.length === 0) {
@@ -939,7 +940,7 @@ verHistoricoActivo(simbolo: string): void {
     });
   
   //Obtener transacciones del símbolo
-  this.http.get(`${this.url}transacciones-simbolo/?simbolo=${simbolo}&user_id=${userId}`)
+  this.http.get(`${this.apiUrl}transacciones-simbolo/?simbolo=${simbolo}&user_id=${userId}`)
     .subscribe({
       next: (res: any) => {
         this.transaccionesActivo = res;

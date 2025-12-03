@@ -5,14 +5,14 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
 import { HttpClientModule } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
+import { FormsModule,ReactiveFormsModule } from '@angular/forms';
 import { LoginRegistroComponent } from './login-registro/login-registro.component';
-import { ReactiveFormsModule } from '@angular/forms';
 import { HomeComponent } from './home/home.component';
 import { CommonModule } from '@angular/common';
 
 //GRAFICOS:
-import { NgChartsModule } from 'ng2-charts';
+import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
   declarations: [
@@ -21,16 +21,18 @@ import { NgChartsModule } from 'ng2-charts';
     HomeComponent
   ],
   imports: [
-    NgChartsModule,
+    BaseChartDirective,
     HttpClientModule,
     FormsModule,
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,
-    CommonModule
-
+    CommonModule,
+    RouterModule
   ],
-  providers: [],
+  providers: [
+    provideCharts(withDefaultRegisterables())
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -1200,3 +1200,118 @@ tbody tr:last-child td {
 .add-button:active {
   transform: scale(0.98);
 }
+
+.modal-cuenta {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-content-cuenta {
+  width: 90%;
+  max-width: 800px;
+  background: #1f2127;
+  border-radius: 18px;
+  padding: 24px 28px 28px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+  color: #f5f5f5;
+}
+
+.titulo-cuenta {
+  text-align: center;
+  margin-bottom: 8px;
+  font-size: 24px;
+}
+
+.info-basica {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.info-basica .nombre {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.info-basica .email {
+  font-size: 14px;
+  color: #a0a0a0;
+}
+
+.resumen-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.card-resumen {
+  border-radius: 14px;
+  padding: 16px 18px;
+  background: linear-gradient(135deg, #262833, #181920);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.card-resumen.invertido .cantidad {
+  color: #ffdd55;
+}
+
+.card-resumen.valor-actual .cantidad {
+  color: #4cd964;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #b5b5b5;
+  margin-bottom: 10px;
+}
+
+.card-body .cantidad {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.card-body .descripcion {
+  font-size: 13px;
+  color: #9a9a9a;
+}
+
+.rendimiento {
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.rendimiento .positivo {
+  color: #4cd964;
+}
+
+.rendimiento .negativo {
+  color: #ff4f4f;
+}
+
+.btn-cerrar {
+  display: block;
+  margin: 0 auto;
+  margin-top: 4px;
+  padding: 10px 26px;
+  border-radius: 999px;
+  border: none;
+  background: #3498db;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+.btn-cerrar:hover {
+  background: #2980b9;
+}

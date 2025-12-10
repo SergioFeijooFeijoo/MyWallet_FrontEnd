@@ -84,14 +84,68 @@
   <div *ngIf="!mostrarCuenta && !mostrarGraficos" class="add-button" (click)="irAgregarTransaccion()">+ Añadir Activo</div>
 
 
-<div *ngIf="mostrarCuenta" class="perfil-y-grafico">
-  <div class="perfil-container">
-    <h2 style="text-decoration:underline;">Perfil de Usuario:</h2>
-    <p><strong>Nombre:</strong> {{ perfilUsuario.first_name }} {{ perfilUsuario.last_name }}</p>
-    <p><strong>Email:</strong> {{ perfilUsuario.email }}</p>
-    <p><strong>Total En Cartera:</strong> {{ perfilUsuario.total_invertido | currency:'EUR' }}</p>
-          <button class="tab" (click)="logout()">Cerrar Sesión</button>
+<div class="modal-cuenta" *ngIf="mostrarCuenta">
+  <div class="modal-content-cuenta">
+    <h2 class="titulo-cuenta">Perfil de Usuario</h2>
 
+    <div class="info-basica">
+      <p class="nombre">
+        {{ perfilUsuario.first_name }} {{ perfilUsuario.last_name }}
+      </p>
+      <p class="email">
+        {{ perfilUsuario.email }}
+      </p>
+    </div>
+
+    <div class="resumen-grid">
+      <!-- Capital Invertido -->
+      <div class="card-resumen invertido">
+        <div class="card-header">
+          <span>Capital Invertido</span>
+          <span class="icono">💼</span>
+        </div>
+        <div class="card-body">
+          <div class="cantidad">
+            {{ perfilUsuario.total_invertido | currency:'EUR':'symbol':'1.2-2' }}
+          </div>
+          <div class="descripcion">
+            Dinero total que has aportado a tu cartera.
+          </div>
+        </div>
+      </div>
+
+      <!-- Valor Actual de la Cartera -->
+      <div class="card-resumen valor-actual">
+        <div class="card-header">
+          <span>Valor Actual de la Cartera</span>
+          <span class="icono">📈</span>
+        </div>
+        <div class="card-body">
+          <div class="cantidad">
+            {{ perfilUsuario.valor_actual | currency:'EUR':'symbol':'1.2-2' }}
+          </div>
+          <div class="descripcion">
+            Suma del valor actual de todos tus activos.
+          </div>
+          <div class="rendimiento">
+            Rendimiento total:
+            <span
+              [ngClass]="{
+                'positivo': perfilUsuario.retorno_total >= 0,
+                'negativo': perfilUsuario.retorno_total < 0
+              }"
+            >
+              {{ perfilUsuario.retorno_total | currency:'EUR':'symbol':'1.2-2' }}
+              ({{ perfilUsuario.rendimiento_pct }}%)
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-cerrar" (click)="cerrarCuenta()">
+      Cerrar Sesión
+    </button>
   </div>
 </div>
 

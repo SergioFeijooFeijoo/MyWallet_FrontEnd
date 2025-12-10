@@ -36,7 +36,12 @@ export class HomeComponent implements OnInit{
   ){}
 
   ngOnInit(): void {
-    const userId = Number(localStorage.getItem('usuario'));
+     const userIdRaw = localStorage.getItem('usuario');
+    if (!userIdRaw) {
+      this.logout();
+      return;
+    }
+    const userId = Number(userIdRaw);
     
     this.http.get<Activo[]>(`${this.apiUrl}/activos/${userId}/`) 
     .subscribe({
@@ -205,14 +210,26 @@ export class HomeComponent implements OnInit{
   perfilUsuario: any = {}
 
   verCuenta() {
+    const userIdRaw = localStorage.getItem('usuario');
+    if(!userIdRaw) {
+      alert('Sesion no valida. Vuelvea iniciar sesion.');
+      this.logout();
+      return;
+    }
+
+    
+    const userId = parseInt(userIdRaw, 10);
+    
     this.mostrarCuenta = true;
-    const userId = parseInt(localStorage.getItem('usuario') || '0', 10);
+
     this.http.get(`${this.apiUrl}/perfil/${userId}`).subscribe({
       next: (res) => {
         this.perfilUsuario = res;
       },
-      error:() => {
+      error:(err) => {
+        console.error('Error al cargar el perfil:', err);
         alert("No se pudo cargar el perfil del usuario");
+        this.logout();
       }
     });
   }
@@ -223,17 +240,28 @@ export class HomeComponent implements OnInit{
 
   // Funcionalidad para ver los graficos del usuario:
   mostrarGraficos: boolean = false;
-  verGraficos() { 
-    this.mostrarGraficos = true;
-    const userId = parseInt(localStorage.getItem('usuario') || '0', 10);
-    this.http.get(`${this.apiUrl}/perfil/${userId}`).subscribe({
-      next:(res) => {
-        this.perfilUsuario = res;
-      },
-      error:()=>{
-        alert("No se pudo cargar el perfil del ususario.");
-      }
-    });
+  verGraficos() {
+  const userIdRaw = localStorage.getItem('usuario');
+  if (!userIdRaw) {
+    alert('Sesión no válida. Vuelve a iniciar sesión.');
+    this.logout();
+    return;
+  }
+
+  const userId = parseInt(userIdRaw, 10);
+
+  this.mostrarGraficos = true;
+
+  this.http.get(`${this.apiUrl}/perfil/${userId}`).subscribe({
+    next: (res) => {
+      this.perfilUsuario = res;
+    },
+    error: (err) => {
+      console.error('Error al cargar el perfil:', err);
+      alert('No se pudo cargar el perfil del usuario');
+      this.logout();
+    }
+  });
   }
 
   cerrarGraficos() {
